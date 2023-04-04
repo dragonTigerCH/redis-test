@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class CourseClass {
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long seq;
 
@@ -24,13 +23,17 @@ public class CourseClass {
     private Course course;
 
     @OneToMany(mappedBy = "courseClass")
+    @Builder.Default
     private List<CourseMember> courseMemberList = new ArrayList<>();
 
-    public void limitedNumberOfStudents(){
+    public void limitedNumberOfStudents() {
+
         int currentNumberOfStudents = (int) this.courseMemberList.stream().count();
-        log.info("현재 수강 신청 인원수 :: {}",currentNumberOfStudents);
-        if (this.limitPeople < currentNumberOfStudents + 1)
+        log.info("현재 수강 신청 인원수 :: {}", currentNumberOfStudents);
+        if (this.limitPeople < currentNumberOfStudents + 1) {
+            log.info("수강 신청 정원이 모두 찼습니다.");
             throw new RuntimeException("수강 신청 정원이 모두 찼습니다. currentNumberOfStudents = " + currentNumberOfStudents);
+        }
     }
 
 }

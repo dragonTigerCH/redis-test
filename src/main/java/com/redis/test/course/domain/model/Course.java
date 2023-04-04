@@ -20,6 +20,7 @@ public class Course {
     private String name;
 
     @OneToMany(mappedBy = "course")
+    @Builder.Default
     private List<CourseClass> courseClassList = new ArrayList<>();
 
 
