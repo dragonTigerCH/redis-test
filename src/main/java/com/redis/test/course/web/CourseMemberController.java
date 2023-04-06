@@ -1,5 +1,7 @@
 package com.redis.test.course.web;
 
+import com.redis.test.course.domain.model.CourseClass;
+import com.redis.test.course.domain.model.CourseMember;
 import com.redis.test.course.service.CourseMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

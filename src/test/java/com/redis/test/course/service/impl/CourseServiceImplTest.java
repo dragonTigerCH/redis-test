@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +51,8 @@ class CourseServiceImplTest {
 
         //given
 
-        ExecutorService executorService = Executors.newFixedThreadPool(100);
+        ExecutorService executorService = Executors.newFixedThreadPool(100); //고정 스레드 풀을 11개를 준비
         CountDownLatch countDownLatch = new CountDownLatch(100);
-        final String worker = Thread.currentThread().getName();
         log.info("[1구간]현재 쓰레드 개수 :: "+countDownLatch.getCount());
 
         Long courseSeq = courseService.save("테스트 과정");
@@ -66,30 +66,29 @@ class CourseServiceImplTest {
         }
 
         List<Member> memberList = memberRepository.findAllById(memberIdLists);
-
         //when
         for (Member member : memberList) {
+                //스레드 n개중 한개의 쓰레드 할당
                 executorService.submit(() -> {
                 try {
-//                    Long savedLockCourseMember = courseMemberService.save(member.getSeq(), savedCourseClassSeq);
                     Long savedLockCourseMember = courseLockUtils.saveLock(member.getSeq(), savedCourseClassSeq);
-                    log.info("저장된 CourseMemberSeq :: {}", savedLockCourseMember);
                     courseMemberIdLists.add(savedLockCourseMember);
-                } catch (InterruptedException e) {
+                }
+                catch (InterruptedException e) {
                     throw new RuntimeException(e);
-                } finally {
+                }
+                finally {
                     countDownLatch.countDown();
                     log.info("[2구간]현재 쓰레드 개수 :: " + countDownLatch.getCount());
                 }
-                });
 
 
+            });
         }
-        log.info("현재 쓰레드 :: {}",worker);
         log.info("[3구간]현재 쓰레드 개수 :: {}",countDownLatch.getCount());
         countDownLatch.await();
+        executorService.shutdown();
         List<CourseMember> courseMembers = courseMemberRepository.findAllById(courseMemberIdLists);
-        log.info("리스트 :: {}",courseMemberIdLists);
 
         //then
         Assertions.assertThat(courseMembers.size()).isEqualTo(11);

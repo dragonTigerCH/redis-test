@@ -2,6 +2,8 @@ package com.redis.test.course.domain.model;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -23,17 +25,18 @@ public class CourseClass {
     private Course course;
 
     @OneToMany(mappedBy = "courseClass")
-    @Builder.Default
     private List<CourseMember> courseMemberList = new ArrayList<>();
 
-    public void limitedNumberOfStudents() {
-
+    public boolean limitedNumberOfStudents() {
         int currentNumberOfStudents = (int) this.courseMemberList.stream().count();
-        log.info("현재 수강 신청 인원수 :: {}", currentNumberOfStudents);
+        log.info("확인 {} :: {}",limitPeople,currentNumberOfStudents);
         if (this.limitPeople < currentNumberOfStudents + 1) {
             log.info("수강 신청 정원이 모두 찼습니다.");
-            throw new RuntimeException("수강 신청 정원이 모두 찼습니다. currentNumberOfStudents = " + currentNumberOfStudents);
+            return false;
         }
+        log.info("현재 수강 신청 인원수 :: {}", currentNumberOfStudents);
+        return true;
     }
+
 
 }

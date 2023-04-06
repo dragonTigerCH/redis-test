@@ -1,5 +1,9 @@
 package com.redis.test.course.service.redisson;
 
+import com.redis.test.course.domain.model.CourseClass;
+import com.redis.test.course.domain.model.CourseMember;
+import com.redis.test.course.domain.repository.CourseClassRepository;
+import com.redis.test.course.domain.repository.CourseMemberRepository;
 import com.redis.test.course.service.CourseMemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -24,47 +29,22 @@ public class CourseLockUtils {
 
     private final RedissonClient redissonClient;
     private final CourseMemberService courseMemberService;
+    private final CourseMemberRepository courseMemberRepository;
+    private final CourseClassRepository courseClassRepository;
 
     public Long saveLock(Long memberSeq, Long courseClassSeq) throws InterruptedException {
 
-        RLock lock = redissonClient.getLock(String.format("PARTICIPANT:%d", memberSeq));
+            RLock rLock = redissonClient.getLock("postLock");
         try {
-            boolean success = lock.tryLock(4, 5, TimeUnit.SECONDS);
-            log.info("성공 {}",success);
+            boolean success = rLock.tryLock(5,2, TimeUnit.SECONDS);
             if (!success){
                 log.info("락 획득 실패");
                 throw new IllegalArgumentException();
             }
-            Thread.sleep(50);
-            Long savedCourseMember = courseMemberService.save(memberSeq, courseClassSeq);
-            return savedCourseMember;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            return courseMemberService.save(memberSeq,courseClassSeq);
         } finally {
-            lock.unlock();
+            rLock.unlock();
         }
-    }
-    public boolean acquireLock(String lockName, long timeout) {
-        String lockKey = "locks:" + lockName;
-        String luaScript = "if redis.call('exists', KEYS[1]) == 0 then\n" +
-                "redis.call('hset', KEYS[1], ARGV[1], ARGV[2]);\n" +
-                "return 1;\n" +
-                "end;\n" +
-                "return 0;";
-        RScript scriptObj = redissonClient.getScript();
-        RFuture<Long> future = scriptObj.evalAsync(RScript.Mode.READ_WRITE, luaScript, RScript.ReturnType.INTEGER, Collections.singletonList(lockKey), timeout / 1000);
-        try {
-            Long result = future.get(timeout, TimeUnit.MILLISECONDS);
-            log.info("result :: {}",result);
-            return result != null && result == 1;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public void releaseLock(String lockName) {
-        String lockKey = "locks:" + lockName;
-        redissonClient.getBucket(lockKey).delete();
     }
 
 
