@@ -29,7 +29,6 @@ public class CourseClass {
 
     public boolean limitedNumberOfStudents() {
         int currentNumberOfStudents = (int) this.courseMemberList.stream().count();
-        log.info("확인 {} :: {}",limitPeople,currentNumberOfStudents);
         if (this.limitPeople < currentNumberOfStudents + 1) {
             log.info("수강 신청 정원이 모두 찼습니다.");
             return false;

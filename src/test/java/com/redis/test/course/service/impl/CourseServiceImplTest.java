@@ -51,16 +51,16 @@ class CourseServiceImplTest {
 
         //given
 
-        ExecutorService executorService = Executors.newFixedThreadPool(100); //고정 스레드 풀을 11개를 준비
-        CountDownLatch countDownLatch = new CountDownLatch(100);
+        ExecutorService executorService = Executors.newFixedThreadPool(1000); //고정 스레드 풀을 10000개를 준비
+        CountDownLatch countDownLatch = new CountDownLatch(1000);
         log.info("[1구간]현재 쓰레드 개수 :: "+countDownLatch.getCount());
 
         Long courseSeq = courseService.save("테스트 과정");
-        Long savedCourseClassSeq = courseClassService.save(courseSeq,11);
+        Long savedCourseClassSeq = courseClassService.save(courseSeq,950);
 
         List<Long> memberIdLists = new ArrayList<>();
         List<Long> courseMemberIdLists = new ArrayList<>();
-        for (int i = 1; i < 101; i++) {
+        for (int i = 1; i < 1001; i++) {
             Long savedMembers = memberService.save("DragonTiger" + i);
             memberIdLists.add(savedMembers);
         }
@@ -87,11 +87,10 @@ class CourseServiceImplTest {
         }
         log.info("[3구간]현재 쓰레드 개수 :: {}",countDownLatch.getCount());
         countDownLatch.await();
-        executorService.shutdown();
         List<CourseMember> courseMembers = courseMemberRepository.findAllById(courseMemberIdLists);
 
         //then
-        Assertions.assertThat(courseMembers.size()).isEqualTo(11);
+        Assertions.assertThat(courseMembers.size()).isEqualTo(950);
 
     }
 
