@@ -33,9 +33,8 @@ public class CourseMemberServiceImpl implements CourseMemberService {
         CourseClass courseClass = courseClassRepository.findById(courseClassSeq)
                 .orElseThrow(() -> new RuntimeException("해당 과정 클래스를 찾을 수 없습니다. courseClassSeq :: " + courseClassSeq));
 
-        if (!courseClass.limitedNumberOfStudents()) {
-            throw new RuntimeException("땡");
-        }
+        //수강 인원 검증
+        courseClass.exceedingTheNumberOfStudents();
 
         CourseMember courseMember = courseMemberRepository.save(
                 CourseMember

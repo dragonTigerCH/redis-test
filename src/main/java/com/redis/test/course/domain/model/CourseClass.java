@@ -27,15 +27,13 @@ public class CourseClass {
     @OneToMany(mappedBy = "courseClass")
     private List<CourseMember> courseMemberList = new ArrayList<>();
 
-    public boolean limitedNumberOfStudents() {
+
+    public void exceedingTheNumberOfStudents() {
         int currentNumberOfStudents = (int) this.courseMemberList.stream().count();
+        log.info("현재 수강 신청 인원수 :: {}", currentNumberOfStudents);
         if (this.limitPeople < currentNumberOfStudents + 1) {
             log.info("수강 신청 정원이 모두 찼습니다.");
-            return false;
+            throw new RuntimeException("현재 수강인원이 가득 찼습니다.");
         }
-        log.info("현재 수강 신청 인원수 :: {}", currentNumberOfStudents);
-        return true;
     }
-
-
 }

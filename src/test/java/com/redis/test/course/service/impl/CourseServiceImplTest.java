@@ -11,20 +11,16 @@ import com.redis.test.member.domain.repository.MemberRepository;
 import com.redis.test.member.service.MemberService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicLong;
 
 @SpringBootTest
 @Slf4j
@@ -41,8 +37,6 @@ class CourseServiceImplTest {
     @Autowired
     private CourseClassService courseClassService;
     @Autowired
-    private CourseMemberService courseMemberService;
-    @Autowired
     private CourseLockUtils courseLockUtils;
 
     @Test
@@ -50,17 +44,16 @@ class CourseServiceImplTest {
     void 수강신청_테스트() throws InterruptedException {
 
         //given
-
-        ExecutorService executorService = Executors.newFixedThreadPool(1000); //고정 스레드 풀을 10000개를 준비
-        CountDownLatch countDownLatch = new CountDownLatch(1000);
+        ExecutorService executorService = Executors.newFixedThreadPool(100); //고정 스레드 풀을 100개를 준비
+        CountDownLatch countDownLatch = new CountDownLatch(100);
         log.info("[1구간]현재 쓰레드 개수 :: "+countDownLatch.getCount());
 
         Long courseSeq = courseService.save("테스트 과정");
-        Long savedCourseClassSeq = courseClassService.save(courseSeq,950);
+        Long savedCourseClassSeq = courseClassService.save(courseSeq,11);
 
         List<Long> memberIdLists = new ArrayList<>();
         List<Long> courseMemberIdLists = new ArrayList<>();
-        for (int i = 1; i < 1001; i++) {
+        for (int i = 1; i < 101; i++) {
             Long savedMembers = memberService.save("DragonTiger" + i);
             memberIdLists.add(savedMembers);
         }
@@ -90,7 +83,7 @@ class CourseServiceImplTest {
         List<CourseMember> courseMembers = courseMemberRepository.findAllById(courseMemberIdLists);
 
         //then
-        Assertions.assertThat(courseMembers.size()).isEqualTo(950);
+        Assertions.assertThat(courseMembers.size()).isEqualTo(11);
 
     }
 

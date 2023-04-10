@@ -18,8 +18,6 @@ public class CourseLockUtils {
 
     private final RedissonClient redissonClient;
     private final CourseMemberService courseMemberService;
-    private final CourseMemberRepository courseMemberRepository;
-    private final CourseClassRepository courseClassRepository;
 
     public Long saveLock(Long memberSeq, Long courseClassSeq) throws InterruptedException {
 
@@ -35,7 +33,5 @@ public class CourseLockUtils {
             rLock.unlock();
         }
     }
-
-
 
 }
