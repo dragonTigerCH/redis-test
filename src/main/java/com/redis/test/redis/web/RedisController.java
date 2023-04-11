@@ -1,4 +1,4 @@
-package com.redis.test;
+package com.redis.test.redis.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

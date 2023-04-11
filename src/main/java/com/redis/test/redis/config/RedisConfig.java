@@ -1,4 +1,4 @@
-package com.redis.test.config;
+package com.redis.test.redis.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
